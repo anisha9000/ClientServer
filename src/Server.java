@@ -1,15 +1,18 @@
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
 
     private static ServerSocket serverSocket = null;
+    private static HashMap<Integer, Integer> dataMap = null;
     
     static void initServer() {
         try {
+            dataMap = new HashMap<>();
             serverSocket = new ServerSocket(Constants.PORT);
             System.out.println("Waiting for client");
         } catch (IOException ex) {
@@ -49,7 +52,8 @@ public class Server {
                 DataInputStream iStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
                 DataOutputStream oStream = new DataOutputStream(clientSocket.getOutputStream());
                 
-                ClientHandler clientHandler = new ClientHandler(clientSocket, iStream, oStream);
+                ClientHandler clientHandler = new ClientHandler(clientSocket, 
+                        iStream, oStream, dataMap);
                 Thread clientThread = new Thread(clientHandler);
                 clientThread.start();
 
