@@ -6,15 +6,11 @@ import java.util.logging.Logger;
 
 public class Server {
 
-    private static Socket socket = null;
-    private static ServerSocket server = null;
-    private static DataInputStream iStream = null;
-    private static DataOutputStream oStream = null;
+    private static ServerSocket serverSocket = null;
     
     static void initServer() {
         try {
-            server = new ServerSocket(Constants.PORT);
-            oStream = new DataOutputStream(System.out);
+            serverSocket = new ServerSocket(Constants.PORT);
             System.out.println("Waiting for client");
         } catch (IOException ex) {
             System.out.println("IOException:" + ex.getMessage());
@@ -22,11 +18,10 @@ public class Server {
         }
 
     }
-    
-    static void closeServer() {
+
+    static void closeServer(Socket clientSocket, DataInputStream iStream, DataOutputStream oStream) {
         try {
-            socket.close();
-            server.close();
+            clientSocket.close();
             iStream.close();
             oStream.close();
         } catch (IOException ex) {
@@ -34,36 +29,40 @@ public class Server {
         }
 
     }
+    
+    static void closeServer() {
+        try {
+            serverSocket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public static void main(String[] args) {
         System.out.println("Server process started");
         initServer();
-        try {
-            socket = server.accept();
-            iStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-            
-            
+        while (true) {
+            try {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Connected client:"+ clientSocket.getInetAddress());
+                
+                DataInputStream iStream = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
+                DataOutputStream oStream = new DataOutputStream(clientSocket.getOutputStream());
+                
+                ClientHandler clientHandler = new ClientHandler(clientSocket, iStream, oStream);
+                Thread clientThread = new Thread(clientHandler);
+                clientThread.start();
 
-            String line = "";
-            while (!line.equalsIgnoreCase("exit")) {
-                try {
-                    line = iStream.readUTF();
-                    System.out.println("line read:"+line);
-                    oStream.writeUTF(line);
-                } catch (IOException ex) {
-                    System.out.println("IOException:" + ex.getMessage());
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                
 
+            } catch (IOException ex) {
+                closeServer();
+                System.out.println("IOException:" + ex.getMessage());
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-        } catch (IOException ex) {
-            System.out.println("IOException:" + ex.getMessage());
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         
-        closeServer();
 
     }
 }
