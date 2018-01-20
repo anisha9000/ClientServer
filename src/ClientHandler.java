@@ -40,17 +40,18 @@ public class ClientHandler implements Runnable {
             try {
                 receivedMessage = iStream.readUTF();
                 if (receivedMessage.equalsIgnoreCase("exit")) {
-                    System.out.println("Closing connection with client:"+ clientSocket.getInetAddress());
+                    System.out.println("Closing connection with client:" + clientSocket.getInetAddress());
                     Server.closeServer(clientSocket, iStream, oStream);
                     break;
                 }
-                System.out.println("Command received:" + receivedMessage);
+                System.out.println(Utils.getCurrentTime() + ": Request: " + receivedMessage);
                 runCommand(receivedMessage);
 
             } catch (IOException ex) {
                 Server.closeServer(clientSocket, iStream, oStream);
                 System.out.println("IOException:" + ex.getMessage());
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                break;
             }
 
         }
@@ -61,6 +62,7 @@ public class ClientHandler implements Runnable {
 
     private void runCommand(String receivedMessage) {
         String[] command = receivedMessage.split(" ");
+        String responseStr = "";
         int key = Integer.parseInt(command[1]);
         int value;
         switch (command[0]) {
@@ -68,38 +70,37 @@ public class ClientHandler implements Runnable {
                 value = Integer.parseInt(command[2]);
                 synchronized (dataMap) {
                     dataMap.put(key, value);
-                    try {
-                        oStream.writeUTF("Value Stored");
-                    } catch (IOException ex) {
-                        Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    responseStr = "Value Stored";
                 }
                 break;
             case "GET":
                 synchronized (dataMap) {
-                    try {
-                        if (!dataMap.containsKey(key)) {
-                            oStream.writeUTF("Value for " + key + " not found.");
-                        } else {
-                            value = dataMap.get(key);
-                            oStream.writeUTF("Value for " + key + ": " + value);
-                        }
-                    } catch (IOException ex) {
-                        Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    if (!dataMap.containsKey(key)) {
+                        responseStr = "Value for " + key + " not found.";
+                    } else {
+                        value = dataMap.get(key);
+                        responseStr = "Value for " + key + ": " + value;
                     }
                 }
                 break;
             case "DELETE":
                 synchronized (dataMap) {
-                    dataMap.remove(key);
-                    try {
-                        oStream.writeUTF("Value for " + key + " removed.");
-                    } catch (IOException ex) {
-                        Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    if (!dataMap.containsKey(key)) {
+                        responseStr = "Key " + key + " not found.";
+                    } else {
+                        dataMap.remove(key);
+                        responseStr = "Value for " + key + " removed.";
                     }
                 }
                 break;
 
+        }
+
+        try {
+            oStream.writeUTF(responseStr);
+            System.out.println(Utils.getCurrentTime() + ": Response: " + responseStr);
+        } catch (IOException ex) {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

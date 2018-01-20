@@ -40,7 +40,7 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        System.out.println("Client process started");
+        
         if (args.length < 2) {
             Utils.clientUsage();
             return;
@@ -54,6 +54,8 @@ public class Client {
             Utils.clientUsage();
             return;
         }
+        
+        System.out.println("Client process started");
 
         System.out.println("Connected to server:" + socket.getInetAddress());
         Utils.clientKeyAccessUsage();
@@ -64,7 +66,7 @@ public class Client {
                 String receivedMessage = "";
 
                 Utils.checkCommandSyntax();
-                System.out.println("Line read:" + sentCommand);
+                System.out.println(Utils.getCurrentTime() + ": Request: " + sentCommand);
                 oStream.writeUTF(sentCommand);
 
                 if (sentCommand.equalsIgnoreCase("exit")) {
@@ -73,10 +75,11 @@ public class Client {
                     break;
                 }
                 receivedMessage = iStream.readUTF();
-                System.out.println("Received Message:" + receivedMessage);
+                System.out.println(Utils.getCurrentTime() + ": Response: " + receivedMessage);
             } catch (IOException ex) {
                 closeClient();
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("Check socket connection");
+                //Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                 break;
             }
 
