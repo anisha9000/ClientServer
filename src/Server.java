@@ -2,6 +2,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,7 +10,7 @@ public class Server {
 
     private static ServerSocket serverSocket = null;
     private static HashMap<Integer, Integer> dataMap = null;
-
+    
     static void initServer(int port) {
         try {
             dataMap = Utils.getHashMapFromFile();
@@ -45,7 +46,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        
+
         if (args.length < 1) {
             Utils.serverUsage();
             return;
@@ -58,9 +59,9 @@ public class Server {
             Utils.serverUsage();
             return;
         }
-        
-        System.out.println("Server process started");
 
+        System.out.println("Server process started");
+        
         while (true) {
             try {
                 Socket clientSocket = serverSocket.accept();
@@ -80,7 +81,7 @@ public class Server {
             } catch (IOException ex) {
                 closeServer();
                 System.out.println("IOException:" + ex.getMessage());
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, 
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null,
                         ex);
             }
         }

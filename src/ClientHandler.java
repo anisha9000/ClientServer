@@ -39,7 +39,7 @@ public class ClientHandler implements Runnable {
         while (true) {
             try {
                 receivedMessage = iStream.readUTF();
-                
+
                 if (receivedMessage.equalsIgnoreCase("exit")) {
                     System.out.println("Closing connection with client:" + clientSocket.getInetAddress());
                     Server.closeServer(clientSocket, iStream, oStream);
@@ -58,47 +58,52 @@ public class ClientHandler implements Runnable {
         }
 
         Server.closeServer(clientSocket, iStream, oStream);
+        Utils.saveHashMapToFile(dataMap);
 
     }
 
     private void runCommand(String receivedMessage) {
-        if(!Utils.checkCommandSyntax(receivedMessage)) {
-            System.out.println("Invalid command");
-            return;
-        }
-        String[] command = receivedMessage.split(" ");
         String responseStr = "";
-        int key = Integer.parseInt(command[1]);
-        int value;
-        switch (command[0]) {
-            case "PUT":
-                value = Integer.parseInt(command[2]);
-                synchronized (dataMap) {
-                    dataMap.put(key, value);
-                    responseStr = "Value Stored";
-                }
-                break;
-            case "GET":
-                synchronized (dataMap) {
-                    if (!dataMap.containsKey(key)) {
-                        responseStr = "Value for " + key + " not found.";
-                    } else {
-                        value = dataMap.get(key);
-                        responseStr = "Value for " + key + ": " + value;
-                    }
-                }
-                break;
-            case "DELETE":
-                synchronized (dataMap) {
-                    if (!dataMap.containsKey(key)) {
-                        responseStr = "Key " + key + " not found.";
-                    } else {
-                        dataMap.remove(key);
-                        responseStr = "Value for " + key + " removed.";
-                    }
-                }
-                break;
 
+        if (!Utils.checkCommandSyntax(receivedMessage)) {
+            System.out.println("Invalid command");
+            responseStr = "Invalid command:" + receivedMessage;
+            return;
+        } else {
+            String[] command = receivedMessage.split(" ");
+
+            int key = Integer.parseInt(command[1]);
+            int value;
+            switch (command[0]) {
+                case "PUT":
+                    value = Integer.parseInt(command[2]);
+                    synchronized (dataMap) {
+                        dataMap.put(key, value);
+                        responseStr = "Value Stored";
+                    }
+                    break;
+                case "GET":
+                    synchronized (dataMap) {
+                        if (!dataMap.containsKey(key)) {
+                            responseStr = "Value for " + key + " not found.";
+                        } else {
+                            value = dataMap.get(key);
+                            responseStr = "Value for " + key + ": " + value;
+                        }
+                    }
+                    break;
+                case "DELETE":
+                    synchronized (dataMap) {
+                        if (!dataMap.containsKey(key)) {
+                            responseStr = "Key " + key + " not found.";
+                        } else {
+                            dataMap.remove(key);
+                            responseStr = "Value for " + key + " removed.";
+                        }
+                    }
+                    break;
+
+            }
         }
 
         try {

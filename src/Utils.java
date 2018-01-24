@@ -94,17 +94,17 @@ public class Utils {
         switch (commandComponents[0]) {
             case "PUT":
                 System.out.println("Inside PUT");
-                if(!isNumberValid(commandComponents[1]) || !isNumberValid(commandComponents[2])) {
+                if(commandComponents.length < 3 || !isNumberValid(commandComponents[1]) || !isNumberValid(commandComponents[2])) {
                     isValid = false;
                 }
                 break;
             case "GET":
-                if(!isNumberValid(commandComponents[1])) {
+                if(commandComponents.length < 2 || !isNumberValid(commandComponents[1])) {
                     isValid = false;
                 }
                 break;
             case "DELETE":
-                if(!isNumberValid(commandComponents[1])) {
+                if(commandComponents.length < 2 || !isNumberValid(commandComponents[1])) {
                     isValid = false;
                 }
                 break;
@@ -123,7 +123,6 @@ public class Utils {
         } catch (NumberFormatException ex) {
             isValid = false;
         }
-        System.out.println("isValid:"+ isValid);
         return isValid;
     }
 }
