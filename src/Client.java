@@ -10,7 +10,6 @@ public class Client {
     private static Socket socket = null;
     private static DataOutputStream oStream = null;
     private static DataInputStream iStream = null;
-    private static BufferedReader in = null;
     private static Scanner scanner = null;
 
     static void initClient(String ipAddr, int port) {
@@ -19,8 +18,7 @@ public class Client {
             socket = new Socket(ipAddr, port);
             iStream = new DataInputStream(socket.getInputStream());
             oStream = new DataOutputStream(socket.getOutputStream());
-            in = new BufferedReader(new InputStreamReader(System.in));
-
+    
         } catch (IOException ex) {
             System.out.println("IOException:" + ex.getMessage());
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -65,9 +63,15 @@ public class Client {
                 String sentCommand = scanner.nextLine();
                 String receivedMessage = "";
 
-                Utils.checkCommandSyntax();
+                boolean isValid = Utils.checkCommandSyntax(sentCommand);
+                if(!isValid) {
+                    System.out.println("Invalid command");
+                    oStream.flush();
+                    continue;
+                }
                 System.out.println(Utils.getCurrentTime() + ": Request: " + sentCommand);
                 oStream.writeUTF(sentCommand);
+                oStream.flush();
 
                 if (sentCommand.equalsIgnoreCase("exit")) {
                     System.out.println("Closing connection");

@@ -47,7 +47,7 @@ public class Utils {
 
     static void saveHashMapToFile(HashMap<Integer, Integer> map) {
         try {
-            FileOutputStream fos = new FileOutputStream("valueStore.ser");
+            FileOutputStream fos = new FileOutputStream(filename);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(map);
             oos.close();
@@ -59,16 +59,19 @@ public class Utils {
         }
     }
 
+    private static String filename = "valueStore.txt";
+
     static HashMap<Integer, Integer> getHashMapFromFile() {
         HashMap<Integer, Integer> map = null;
         FileInputStream fis;
         try {
-            File valueFile = new File("valueStore.ser");
+            File valueFile = new File(filename);
             boolean isFile = valueFile.isFile();
             if (!isFile) {
+                System.out.println("File does not exist.");
                 map = new HashMap<>();
             } else {
-                fis = new FileInputStream("valueStore.ser");
+                fis = new FileInputStream(filename);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 map = (HashMap) ois.readObject();
                 ois.close();
@@ -85,7 +88,42 @@ public class Utils {
         return map;
     }
 
-    static void checkCommandSyntax() {
-        //TODO
+    static boolean checkCommandSyntax(String command) {
+        boolean isValid = true;
+        String[] commandComponents = command.split(" ");
+        switch (commandComponents[0]) {
+            case "PUT":
+                System.out.println("Inside PUT");
+                if(!isNumberValid(commandComponents[1]) || !isNumberValid(commandComponents[2])) {
+                    isValid = false;
+                }
+                break;
+            case "GET":
+                if(!isNumberValid(commandComponents[1])) {
+                    isValid = false;
+                }
+                break;
+            case "DELETE":
+                if(!isNumberValid(commandComponents[1])) {
+                    isValid = false;
+                }
+                break;
+            case "EXIT": 
+                break;
+            default: isValid = false;
+        }
+
+        return isValid;
+    }
+
+    private static boolean isNumberValid(String number) {
+        boolean isValid = true;
+        try {
+            Integer.parseInt(number);
+        } catch (NumberFormatException ex) {
+            isValid = false;
+        }
+        System.out.println("isValid:"+ isValid);
+        return isValid;
     }
 }

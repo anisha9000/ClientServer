@@ -39,6 +39,7 @@ public class ClientHandler implements Runnable {
         while (true) {
             try {
                 receivedMessage = iStream.readUTF();
+                
                 if (receivedMessage.equalsIgnoreCase("exit")) {
                     System.out.println("Closing connection with client:" + clientSocket.getInetAddress());
                     Server.closeServer(clientSocket, iStream, oStream);
@@ -61,6 +62,10 @@ public class ClientHandler implements Runnable {
     }
 
     private void runCommand(String receivedMessage) {
+        if(!Utils.checkCommandSyntax(receivedMessage)) {
+            System.out.println("Invalid command");
+            return;
+        }
         String[] command = receivedMessage.split(" ");
         String responseStr = "";
         int key = Integer.parseInt(command[1]);
